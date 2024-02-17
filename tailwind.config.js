@@ -9,4 +9,8 @@ module.exports = {
     },
   },
   plugins: [require("daisyui")],
+  purge: {
+    enabled: true,
+    content: ["./src/**/*.html"],
+  },
 };
