@@ -1,0 +1,83 @@
+{{ define "html/index.tmpl" }}
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Contacts With Htmx</title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="" />
+
+    <script src="/js/htmx.min.js"></script>
+    <link href="/css/output.css" rel="stylesheet" />
+    <!-- <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    /> -->
+  </head>
+  <body hx-boost="true" class="text-xs">
+    <!--[if lt IE 7]>
+      <p class="browsehappy">
+        You are using an <strong>outdated</strong> browser. Please
+        <a href="#">upgrade your browser</a> to improve your experience.
+      </p>
+    <![endif]-->
+    <div class="container mx-10 my-5">
+      <header></header>
+      <main>
+        <header>
+          <form
+            class="text"
+            hx-post="/contacts/add"
+            hx-target="#contact_list"
+            hx-swap="beforeend"
+          >
+            <input
+              type="text"
+              id="full_name"
+              name="name"
+              placeholder="Name"
+              required
+            />
+            <input
+              type="email"
+              name="email"
+              id="email"
+              placeholder="Email"
+              required
+            />
+            <button class="btn btn-primary btn-outline" type="submit">
+              Add
+            </button>
+          </form>
+        </header>
+        <section>
+          <div
+            id="contact_list"
+            hx-get="/contacts/all"
+            hx-trigger="load"
+            hx-swap="innerHTML"
+            hx-vals='{"full": "Y"}'
+          ></div>
+        </section>
+      </main>
+      <footer>
+        <button
+          class="btn btn-outline btn-primary"
+          hx-get="/contacts/reset"
+          hx-target="#contact_list"
+          hx-swap="innerHTML"
+          hx-trigger="click, keyup[cmdkey && key == 'l']"
+        >
+          Refresh
+        </button>
+      </footer>
+    </div>
+  </body>
+</html>
+{{ end }}

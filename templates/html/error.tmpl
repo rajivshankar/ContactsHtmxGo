@@ -1,0 +1,7 @@
+{{ define "html/error.tmpl" }}
+<div class="error">
+  {{ if .message }}
+  <span class="text-error">{{ .message }}</span>
+  {{ end }}
+</div>
+{{ end }}

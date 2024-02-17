@@ -1,0 +1,42 @@
+{{ define "html/contact_edit.tmpl" }}
+<div id="contact-edit-{{ .id }}" class="mx-2">
+  <form
+    hx-post="/contacts/save/{{ .id }}"
+    hx-target="#contact-edit-{{ .id }}"
+    hx-swap="outerHTML"
+  >
+    <input type="text" id="id_tmp" name="id" value="{{ .id }}" hidden />
+    <label for="full_name_tmp">Name:</label>
+    <input
+      type="text"
+      id="full_name_tmp"
+      name="name"
+      value="{{ .name }}"
+      required
+    />
+    <label for="email_tmp">Email:</label>
+    <input
+      type="email"
+      name="email"
+      id="email_tmp"
+      value="{{ .email }}"
+      hx-get="/contacts/validate/email"
+      hx-vals="{&quot;id&quot;: &quot;{{ .id }}&quot;}"
+      hx-target="next .error"
+      hx-trigger="change, keyup delay:1000ms changed"
+      hx-swap="outerHTML"
+      required
+    />
+    <button class="btn btn-outline btn-accent" type="submit">Save</button>
+    <button
+      class="btn btn-outline btn-error"
+      hx-get="/contacts/find/{{ .id }}  "
+      hx-target="#contact-edit-{{ .id }}"
+      hx-swap="outerHTML"
+    >
+      Cancel
+    </button>
+  </form>
+  {{ template "html/error.tmpl" }}
+</div>
+{{ end }}
