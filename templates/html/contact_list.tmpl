@@ -1,51 +1,80 @@
 {{ define "html/contact_list.tmpl" }}
-{{ range.contacts }}
-<div id="contact-details-{{ .Id }}">
-  <div class="flex my-2">
-    <img
-      class="mx-2"
-      src="/img/delete_FILL0_wght400_GRAD0_opsz24.svg"
-      alt="Delete"
-      hx-delete="/contacts/delete/{{ .Id }}"
-      hx-target="#contact-details-{{ .Id }}"
-      hx-swap="delete"
-      hx-confirm="Are you sure you want to delete this contact?"
-    />
-    <strong class="mx-2">Name:</strong>
-    <span class="mx-2">{{ .Name }}</span>
-    <strong class="mx-2">Email:</strong>
-    <span class="mx-2">{{ .Email }}</span>
-    <img
-      class="mx-2"
-      src="/img/edit_FILL0_wght400_GRAD0_opsz24.svg"
-      alt="Edit"
-      hx-get="/contacts/edit/{{ .Id }}"
-      hx-target="#contact-details-{{ .Id }}"
-      hx-swap="outerHTML"
-    />
-  </div>
-</div>
-{{ end }}
-<!-- Infinite Scroll -->
-<!-- {{ if .next }}
-<span
-  hx-trigger="revealed"
-  hx-get="/contacts/all?page={{ .next }}"
-  hx-target="#contact_list"
-  hx-swap="beforeend"
-></span>
-{{ end }} -->
+<section id="page-{{ .page }}">
+  <form>
+    <table>
+      {{
+        range.contacts
+      }}
+      <tr>
+        <td>
+          <input type="checkbox" name="selected_ids" value="{{ .Id }}" />
+        </td>
+        <td>
+          <strong>Name:</strong>
+        </td>
+        <td>
+          <span>{{ .Name }}</span>
+        </td>
+        <td>
+          <strong>Email:</strong>
+        </td>
+        <td>
+          <span>{{ .Email }}</span>
+        </td>
+        <td>
+          <span
+            class="mx-2"
+            hx-get="/contacts/edit/{{ .Id }}"
+            hx-target="#contact-details-{{ .Id }}"
+            hx-swap="outerHTML"
+            >{{ template "edit_svg.tmpl" }}
+          </span>
+        </td>
+        <td>
+          <span
+            hx-delete="/contacts/delete/{{ .Id }}"
+            hx-target="closest tr"
+            hx-swap="delete swap:1s"
+            hx-confirm="Are you sure you want to delete this contact?"
+          >
+            {{ template "delete_svg.tmpl" }}
+          </span>
+        </td>
+      </tr>
+      {{
+        end
+      }}
+    </table>
+    <button
+      id="delete_btn"
+      hx-post="/contacts/delete"
+      hx-confirm="Are you sure you want to delete these contracts"
+      hx-target="body"
+    >
+      Delete Selected
+    </button>
+  </form>
+  <!-- Infinite Scroll -->
+  <!-- {{ if .next }}
+  <span
+    hx-trigger="revealed"
+    hx-get="/contacts/all?page={{ .next }}"
+    hx-target="#page-{{ .page }}"
+    hx-select="section"
+    hx-swap="afterend"
+  ></span>
+  {{ end }} -->
+</section>
 <!-- Navigation Buttons -->
-{{ if eq .full "Y"}}
 <footer>
-  <span style="float: right">
+  <nav class="flex justify-start">
     {{ if .prev }}
     <button
-      class="btn btn-outline btn-info"
+      class="btn btn-outline btn-info mx-2"
       hx-get="/contacts/all?page={{ .prev }}"
       hx-target="#contact_list"
     >
-      Previous Page
+      {{ template "prev_arrow_svg.tmpl" }}
     </button>
     {{ end }}
     {{ if .next }}
@@ -54,10 +83,9 @@
       hx-get="/contacts/all?page={{ .next }}"
       hx-target="#contact_list"
     >
-      Next Page
+      {{ template "next_arrow_svg.tmpl" }}
     </button>
     {{ end }}
-  </span>
+  </nav>
 </footer>
-{{ end }}
 {{ end }}

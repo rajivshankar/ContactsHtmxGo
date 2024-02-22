@@ -64,3 +64,15 @@ func (contacts Contacts) IsValidEmail(id int, email string) (err error) {
 	}
 	return err
 }
+
+func (contacts Contacts) Filter(q string) (result Contacts) {
+	if q == "" {
+		return contacts
+	}
+	for _, contact := range contacts {
+		if strings.Contains(contact.Name, q) || strings.Contains(contact.Email, q) {
+			result = append(result, contact)
+		}
+	}
+	return result
+}

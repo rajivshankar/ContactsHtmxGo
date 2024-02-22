@@ -2,6 +2,7 @@ package main
 
 import (
 	"contacts/contacts"
+	"fmt"
 	"log"
 	"net/http"
 	"sort"
@@ -56,11 +57,14 @@ func setRoutesForContacts(r *gin.Engine) {
 		routes.GET("/reset", GetContactsByPage(true))
 		routes.POST("/add", AddContact())
 		routes.DELETE("/delete/:id", DeleteContact())
+		routes.POST("/delete", BulkDeleteContacts())
 		routes.GET("/edit/:id", EditContact())
 		routes.POST("/save/:id", FindContact(true))
 		routes.GET("/find/:id", FindContact(false))
 		routes.GET("/err/:id", ErrMsg())
 		routes.GET("/validate/email", ValidateEmail())
+		routes.GET("/search", GetContactsByPage(false))
+		routes.GET("/count", GetCountactsCount())
 	}
 }
 
@@ -105,7 +109,8 @@ func DeleteContact() gin.HandlerFunc {
 			ctx.AbortWithStatus(http.StatusNotImplemented)
 		} else {
 			DbContacts = DbContacts.Delete(id)
-			ctx.AbortWithStatus(http.StatusOK)
+			// ctx.AbortWithStatus(http.StatusOK)
+			ctx.String(http.StatusOK, "")
 		}
 	}
 }
@@ -204,6 +209,7 @@ func ValidateEmail() gin.HandlerFunc {
 
 func GetContactsByPage(reset bool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		result := DbContacts
 		ginH := make(gin.H)
 		if reset {
 			InitialiseContacts()
@@ -212,30 +218,38 @@ func GetContactsByPage(reset bool) gin.HandlerFunc {
 		if err != nil || page < 1 {
 			page = 1
 		}
-		full := ctx.Query("full")
-		if strings.EqualFold(full, "Y") {
-			ginH["full"] = "Y"
+		// full := ctx.Query("full")
+		// if strings.EqualFold(full, "Y") {
+		// 	ginH["full"] = "Y"
+		// }
+		triggerElem := ctx.Request.Header.Get("HX-TRIGGER")
+		log.Printf("The element triggering this is %q", triggerElem)
+		if strings.Contains(triggerElem, "search") {
+			queryString := ctx.Query("q")
+			log.Printf("The query string: %q", queryString)
+			result = DbContacts.Filter(queryString)
 		}
+
 		log.Printf("Retrieving Page Number: %d", page)
 		page_length := 10
-		num_pages := int(len(DbContacts) / page_length)
-		if len(DbContacts)%page_length > 1 {
+		num_pages := int(len(result) / page_length)
+		if len(result)%page_length > 1 {
 			num_pages += 1
 		}
 		log.Printf("Number of Pages: %d", num_pages)
 		if page > num_pages && num_pages > 0 {
 			page = num_pages
 		}
-		log.Printf("number of contacts; %d", len(DbContacts))
+		log.Printf("number of contacts; %d", len(result))
 		log.Printf("page length: %d", page_length)
 		start := page_length * (page - 1)
 		log.Printf("start: %d", start)
 		offset := page_length
-		if (start + offset) > len(DbContacts) {
-			offset = len(DbContacts) - start
+		if (start + offset) > len(result) {
+			offset = len(result) - start
 		}
 		log.Printf("offset: %d", offset)
-		result := DbContacts[start:(start + offset)]
+		result = result[start:(start + offset)]
 		ginH["contacts"] = result
 		if page > 1 {
 			ginH["prev"] = page - 1
@@ -245,6 +259,39 @@ func GetContactsByPage(reset bool) gin.HandlerFunc {
 			ginH["next"] = page + 1
 			log.Printf("Next: %d", ginH["next"])
 		}
+		ginH["page"] = page
 		ctx.HTML(http.StatusOK, "html/contact_list.tmpl", ginH)
+	}
+}
+
+func GetCountactsCount() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		count := len(DbContacts)
+		suffix := "Contact"
+		if count != 1 {
+			suffix = fmt.Sprintf("%ss", suffix)
+		}
+		ctx.String(http.StatusOK, fmt.Sprintf("%d %s", count, suffix))
+	}
+}
+
+func BulkDeleteContacts() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		type myForm struct {
+			SelectedIds []string `form:"selected_ids"`
+		}
+		var tempForm myForm
+		if err := ctx.Bind(&tempForm); err != nil {
+			log.Printf("Error while bulk delete: %q", err.Error())
+		}
+		for _, idStr := range tempForm.SelectedIds {
+			if id, err := strconv.Atoi(idStr); err != nil {
+				continue
+			} else {
+				DbContacts = DbContacts.Delete(id)
+			}
+		}
+		ctx.Redirect(http.StatusFound, "/contacts")
+		// ctx.HTML(http.StatusOK, "html/contact_list.tmpl", gin.H{"contacts": DbContacts})
 	}
 }

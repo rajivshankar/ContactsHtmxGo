@@ -1,0 +1,42 @@
+html {
+  font: 75% Verdana, sans-serif;
+  background-color: honeydew;
+  color: darkslategray;
+}
+
+body {
+  margin: 1em 2em;
+}
+
+.app-input {
+  padding: 5px;
+  height: 1.5em;
+  width: fit-content;
+}
+
+.nav {
+  display: flex;
+  align-content: center;
+  justify-content: space-between;
+}
+
+.nav-top {
+  flex-wrap: wrap;
+}
+
+.row-contact {
+  display: flex;
+  justify-content: space-between;
+}
+
+#add-contact {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+#form-add-contact {
+  margin: 0 10px 0 0;
+}
+
+/*# sourceMappingURL=style.css.map */

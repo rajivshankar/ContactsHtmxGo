@@ -11,33 +11,37 @@
     <title>Contacts With Htmx</title>
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="" />
 
     <script src="/js/htmx.min.js"></script>
-    <link href="/css/output.css" rel="stylesheet" />
+    <!-- <link href="/css/output.css" rel="stylesheet" /> -->
+    <link rel="stylesheet" href="/css/normalize.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/transitions.css" />
     <!-- <link
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet"
     /> -->
   </head>
-  <body hx-boost="true" class="text-xs">
+  <body hx-boost="true" class="page text-xs mx-20 my-10">
     <!--[if lt IE 7]>
       <p class="browsehappy">
         You are using an <strong>outdated</strong> browser. Please
         <a href="#">upgrade your browser</a> to improve your experience.
       </p>
     <![endif]-->
-    <div class="container mx-10 my-5">
-      <header></header>
-      <main>
-        <header>
+    <header></header>
+    <main>
+      <header class="nav nav-top flex flex-row flex-wrap justify-between">
+        <section id="add-contact" class="flex flex-row grow items-center">
           <form
-            class="text"
+            id="form-add-contact"
+            class="text flex flex-row"
             hx-post="/contacts/add"
             hx-target="#contact_list"
             hx-swap="beforeend"
           >
             <input
+              class="app-input input input-bordered w-full max-w-xs mr-2 bg-inherit"
               type="text"
               id="full_name"
               name="name"
@@ -45,6 +49,7 @@
               required
             />
             <input
+              class="app-input input input-bordered w-full max-w-xs mr-2 bg-inherit"
               type="email"
               name="email"
               id="email"
@@ -55,29 +60,64 @@
               Add
             </button>
           </form>
-        </header>
-        <section>
-          <div
-            id="contact_list"
-            hx-get="/contacts/all"
-            hx-trigger="load"
-            hx-swap="innerHTML"
-            hx-vals='{"full": "Y"}'
-          ></div>
+          <span class="ml-3" hx-get="/contacts/count" hx-trigger="revealed">
+            <span id="count-spinner" class="ml-1 mr-3 htmx-indicator">
+              {{ template "spinner_svg.tmpl" }}
+            </span>
+          </span>
         </section>
-      </main>
-      <footer>
-        <button
-          class="btn btn-outline btn-primary"
-          hx-get="/contacts/reset"
-          hx-target="#contact_list"
+        <section class="flex items-center">
+          <form
+            class="flex flex-row items-center justify-between my-2"
+            id="search_form"
+            hx-get="/contacts/search"
+            hx-target="#contact_list"
+            hx-swap="innerHTML"
+          >
+            <input
+              class="app-input"
+              id="search"
+              type="search"
+              hx-trigger="search, keyup delay:200ms changed"
+              placeholder="search contacts"
+              name="q"
+              hx-get="/contacts/search"
+              hx-target="#contact_list"
+              hx-swap="body"
+              hx-indicator="#search-spinner"
+            />
+            <input
+              type="submit"
+              class="btn border-red-300 text-red-300 btn-outline hover:fill-red-300"
+              value="Go"
+            />
+            <span id="search-spinner" class="ml-1 mr-3 htmx-indicator">
+              {{ template "spinner_svg.tmpl" }}
+            </span>
+          </form>
+        </section>
+      </header>
+      <section>
+        <div
+          class="my-2"
+          id="contact_list"
+          hx-get="/contacts/all"
+          hx-trigger="load"
           hx-swap="innerHTML"
-          hx-trigger="click, keyup[cmdkey && key == 'l']"
-        >
-          Refresh
-        </button>
-      </footer>
-    </div>
+        ></div>
+      </section>
+    </main>
+    <footer>
+      <button
+        class="btn btn-outline btn-primary m-2"
+        hx-get="/contacts/reset"
+        hx-target="#contact_list"
+        hx-swap="innerHTML"
+        hx-trigger="click, keyup[cmdkey && key == 'l']"
+      >
+        Refresh
+      </button>
+    </footer>
   </body>
 </html>
 {{ end }}
